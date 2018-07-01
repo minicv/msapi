@@ -53,22 +53,34 @@ object_tags = ''
 human_tag = ''
 captions = ''
 
+#Main loop to generate excel which contain the information from images in articles
 for xl_row in range(0,r_sheet.nrows):
+	# Add the number of article first
+	new_sheet.write(xl_row+1,0,str(xl_row+1+922))
+
+	#Obtain the urls from excel. If there is no image url in this cell, continue directly
 	url_images = r_sheet.cell_value(xl_row,4)
 	if len(url_images) <1:
 		continue
+
+	#Split urls according to ','
 	url_images = url_images.split(',')
 
+	#We only detect the first five images in this article
 	if len(url_images)>5:
 		url_images = url_images[0:5]
-	for url in range(0,len(url_images)):
 
+	#Main loop to analyze images and get their information	
+	for url in range(0,len(url_images)):
+		#Get the single url every time and read the corresponding image into memory.
 		image_url = url_images[url]
 		image = io.imread(image_url)
 
-		if image.shape[0]<=50 or image.shape[1]<=50:
+		# Whether the image in url satisfy the demmand of API
+		if len(image.shape)>3 or image.shape[0]<=50 or image.shape[1]<=50:
 			continue
 
+		#Record the images we have analyzed
 		results_urls = results_urls + url_images[url] + ';'
 
 		data    = {'url': image_url}
@@ -78,6 +90,7 @@ for xl_row in range(0,r_sheet.nrows):
 		# The 'analysis' object contains various fields that describe the image. The most
 		# relevant caption for the image is obtained from the 'description' property.
 		analysis = response.json()
+		# Because the frequency of using API is limited, we pause 1s for every image.
 		time.sleep(1)
 
 		if len(analysis['categories']) > 0:
@@ -98,12 +111,12 @@ for xl_row in range(0,r_sheet.nrows):
 		if object_tags!='':
 			object_tags = object_tags[:-1] + ';'
 
-	new_sheet.write(xl_row+1,0,str(xl_row+1))
+
 	if results_urls!='':
 		new_sheet.write(xl_row+1,1,results_urls[:-1])
-	new_sheet.write(xl_row+1+575,2,object_tags)
-	new_sheet.write(xl_row+1+575,3,human_tag)
-	new_sheet.write(xl_row+1+575,4,captions)
+	new_sheet.write(xl_row+1,2,object_tags)
+	new_sheet.write(xl_row+1,3,human_tag)
+	new_sheet.write(xl_row+1,4,captions)
 	new_xl.save("article_attr_phase.xls")
 	results_urls = ''
 	object_tags = ''
