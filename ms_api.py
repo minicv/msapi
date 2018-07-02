@@ -56,7 +56,7 @@ captions = ''
 #Main loop to generate excel which contain the information from images in articles
 for xl_row in range(0,r_sheet.nrows):
 	# Add the number of article first
-	new_sheet.write(xl_row+1,0,str(xl_row+1+922))
+	new_sheet.write(xl_row+1,0,str(xl_row+1+1379))
 
 	#Obtain the urls from excel. If there is no image url in this cell, continue directly
 	url_images = r_sheet.cell_value(xl_row,4)
